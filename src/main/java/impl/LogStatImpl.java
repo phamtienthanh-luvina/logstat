@@ -27,7 +27,7 @@ public class LogStatImpl implements LogStat{
 	public void runLogStat(HashMap<String,Object> conf) {
 		try {
 			LogStatBean bean = new LogStatBean();
-			ScriptingContainer container = new OSGiScriptingContainer(this.bundle,LocalContextScope.SINGLETHREAD,LocalVariableBehavior.PERSISTENT);
+			ScriptingContainer container = new OSGiScriptingContainer(this.bundle,LocalContextScope.SINGLETON ,LocalVariableBehavior.PERSISTENT);
 			container.setHomeDirectory("classpath:/META-INF/jruby.home");
 			System.out.println("LogStartService Running ...");
 

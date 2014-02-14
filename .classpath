@@ -1,28 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" output="target/classes" path="src/main/java"/>
-	<classpathentry kind="src" path="src/main/resources/ruby"/>
-	<classpathentry excluding="**|ruby/" kind="src" output="target/classes" path="src/main/resources"/>
-	<classpathentry kind="src" output="target/test-classes" path="src/test/java"/>
-	<classpathentry excluding="**" kind="src" output="target/test-classes" path="src/test/resources"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+	<classpathentry excluding="**" kind="src" output="target/classes" path="src/main/resources"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
 	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER"/>
-	<classpathentry kind="lib" path="C:/Documents and Settings/nguyenxuanluong/Desktop/DownloadFromChrome/jruby-complete-1.7.10.jar"/>
-	<classpathentry kind="lib" path="C:/Documents and Settings/nguyenxuanluong/.m2/repository/org/apache/felix/org.apache.felix.framework/3.2.2/org.apache.felix.framework-3.2.2.jar">
-		<attributes>
-			<attribute name="maven.groupId" value="org.apache.felix"/>
-			<attribute name="maven.artifactId" value="org.apache.felix.framework"/>
-			<attribute name="maven.version" value="3.2.2"/>
-			<attribute name="maven.scope" value="compile"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="C:/Documents and Settings/nguyenxuanluong/.m2/repository/org/codehaus/groovy/groovy-all/2.2.1/groovy-all-2.2.1.jar">
-		<attributes>
-			<attribute name="maven.groupId" value="org.codehaus.groovy"/>
-			<attribute name="maven.artifactId" value="groovy-all"/>
-			<attribute name="maven.version" value="2.2.1"/>
-			<attribute name="maven.scope" value="compile"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
