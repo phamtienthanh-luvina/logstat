@@ -42,7 +42,9 @@ public class LogStatImpl implements LogStat{
 			container.runScriptlet("bean.setInput(pi.getInputData((bean.getConfig)['input']))");
 			//Filter logs
 			container.runScriptlet("pf = ProcessFilter.new");
-			container.runScriptlet("bean.setOutput(pf.filter(bean.getInput,(bean.getConfig)['filter']))");
+			container.runScriptlet("input_type = (bean.getConfig)['input']['input_type']");
+			container.runScriptlet("filter_type = (bean.getConfig)['input']['filter_type']");
+			container.runScriptlet("bean.setOutput(pf.filter(input_type, filter_type, bean.getInput,(bean.getConfig)['filter']))");
 			//Output logs
 			container.runScriptlet("po = ProcessOutput.new");
 			container.runScriptlet("po.output(bean.getOutput,(bean.getConfig)['output'])");

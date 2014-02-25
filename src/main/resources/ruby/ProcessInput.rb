@@ -1,62 +1,52 @@
-#$LOAD_PATH.insert(0, 'D:/wiperdog/gemdir/win32-eventlog-0.6.0/lib', 'D:/wiperdog/gemdir/jruby-win32ole-0.8.5/lib')
-$LOAD_PATH.unshift('D:/wiperdog/gemdir/win32-eventlog-0.6.0/lib') unless $LOAD_PATH.include?('D:/wiperdog/gemdir/win32-eventlog-0.6.0/lib')
-$LOAD_PATH.unshift('D:/wiperdog/gemdir/jruby-win32ole-0.8.5/lib') unless $LOAD_PATH.include?('D:/wiperdog/gemdir/jruby-win32ole-0.8.5/lib')
+require 'ruby/libs/Common.rb'
+include CommonUtils
 
 class ProcessInput
-	##
-	 # getInputData: get configurarion and raw data
-	 # @param conf
-	 # @return inputMap
-	##
-	def getInputData(input_conf)
-		if (input_conf['input_type'] == 'file')
-			getDataFromFile(input_conf['input_source'],input_conf['start_pos'])
-		elsif (input_conf['input_type'] == 'eventlog')
-			getEventLog(input_conf['record_number_from'],input_conf['record_number_to'])
-		elsif (input_conf['input_type'] == 'osinfo')
-			getDataWin32Process()
-		end
-	end
-	
-	def getDataFromFile(source_file,start_pos)
-		list_logs = Array.new
-		File.foreach(source_file).with_index do |line, line_num|		
-				if(line_num >= start_pos ) 
-					list_logs << line
-				end				 
-		end
-		return list_logs
-	end
-	
-	def getEventLog(recordNumberFrom, recordNumberTo)
-		#$LOAD_PATH.insert(0,'D:/wiperdog/gemdir/win32-eventlog-0.5.3/lib')
-		require 'win32/eventlog'
-		
-		lstEventLog = Array.new
-		Win32::EventLog.read('Application') do |log|
-			if (log['record_number'] >= recordNumberFrom && log['record_number'] <= recordNumberTo)
-				lstEventLog << log
-				puts log
-			end
-		end
-		puts "aaaa"
-		puts lstEventLog
-	end
-	
-	def getDataWin32Process()
-		require 'jruby-win32ole'
-		
-		wmi = WIN32OLE.connect("winmgmts://")
-		processes = wmi.ExecQuery("select * from win32_process")
-		list_logs = Array.new
-		for process in processes do
-			tmpProcess = "Name:" + process.Name
-			list_logs << tmpProcess
-		end
-		return list_logs
-	end
-	
-	def getDataFromStream(source_file)
-		
-	end
+  ##
+  # getInputData: get raw logs data
+  # @param conf
+  # @return listLogs;
+  ##
+  def getInputData(input_conf)
+    if(input_conf != nil)
+      CommonUtils.require_gem("os")
+      if (input_conf['input_type'] == 'file')
+        #get logs from logs file
+        if(input_conf['path'] != nil)
+          require "ruby/input/file.rb"
+          return getLogsFromFile(input_conf['path'],input_conf['file_format'],input_conf['monitor_type'],input_conf['start_file_name'],input_conf['start_pos'],input_conf['asc_by_fname'],input_conf['from_date'])
+        else
+          puts "[Logstat]: Path to logs directory is required !"
+          return
+        end
+      elsif (input_conf['input_type'] == 'log4j')
+        
+        #get logs from log4j via socket
+        if(input_conf['port'] != nil)
+          require "ruby/input/log4j.rb"
+          return getDataLog4j(input_conf['port'],input_conf['timeout'],input_conf['host'])
+        else
+          puts "[Logstat]:Port is required !"
+          return
+        end
+      elsif (input_conf['input_type'] == 'socket')
+        #get logs from socket
+        if(input_conf['port'] != nil)
+          require "ruby/input/socket.rb"
+          return getDataFromSocket(input_conf['port'],input_conf['timeout'],input_conf['host'])
+        else
+          puts "[Logstat]:Port is required !"
+          return
+        end
+      elsif (OS.windows? && input_conf['input_type'] == 'eventlog')
+        require "ruby/input/event_log.rb"
+        # Call getEventlog method
+        return getEventLog(input_conf['event_log_type'], input_conf['from_time_generated'])
+      elsif (OS.linux? && input_conf['input_type'] == 'sys_log')
+        # Call getSyslog method
+        require "ruby/input/sys_log.rb"
+        return getSyslog(input_conf['path_conf'], input_conf['log_type'], input_conf['from_time_generated'])
+      end
+    end
+  end
 end

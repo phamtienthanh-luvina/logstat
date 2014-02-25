@@ -8,5 +8,5 @@ import java.util.HashMap;
  *
  */
 public interface LogStat {
-	void runLogStat(HashMap<String, Object> conf);
+	public void runLogStat(HashMap<String, Object> conf);
 }
