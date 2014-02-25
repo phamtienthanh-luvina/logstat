@@ -33,7 +33,6 @@ public class LogStatImpl implements LogStat{
 
 			bean.setConfig(conf);
 			container.put("bean", bean);
-			System.out.println(bean.getConfig().toString());
 			container.runScriptlet("require 'ruby/ProcessInput.rb'");
 			container.runScriptlet("require 'ruby/ProcessFilter.rb'");
 			container.runScriptlet("require 'ruby/ProcessOutput.rb'");
@@ -42,9 +41,9 @@ public class LogStatImpl implements LogStat{
 			container.runScriptlet("bean.setInput(pi.getInputData((bean.getConfig)['input']))");
 			//Filter logs
 			container.runScriptlet("pf = ProcessFilter.new");
-			container.runScriptlet("input_type = (bean.getConfig)['input']['input_type']");
-			container.runScriptlet("filter_type = (bean.getConfig)['input']['filter_type']");
-			container.runScriptlet("bean.setOutput(pf.filter(input_type, filter_type, bean.getInput,(bean.getConfig)['filter']))");
+			container.runScriptlet("filter_type = (bean.getConfig)['filter']['filter_type']");
+			container.runScriptlet("filter_conf = (bean.getConfig)['filter']['filter_conf']");
+			container.runScriptlet("bean.setOutput(pf.filter(filter_type, filter_conf, bean.getInput)");
 			//Output logs
 			container.runScriptlet("po = ProcessOutput.new");
 			container.runScriptlet("po.output(bean.getOutput,(bean.getConfig)['output'])");
