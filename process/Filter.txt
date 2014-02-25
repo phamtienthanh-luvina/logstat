@@ -1,0 +1,33 @@
+Xu ly filter se phu thuoc vao input data la dang j.
+Ben duoi la input filter cho tung truong hop.
+
+1. Input data dang text (plain text file, syslog, socket)
+Xu ly filter regular expression, co 2 truong hop:
+	a. Filter dang mapping theo tung field:
+		Input: type = match_field, data = [fieldA: /regex 1/, fieldB: /regex 2/,....]
+		Dieu kien: data khac null, khac rong
+			Truong hop 1 record log ko mapping voi tat ca cac truong khai bao  o data thi ko dua vao ket qua cuoi cung
+		Output: Lay ra cac truong duoc khai bao tai data, voi 1 record, co it nhat 1 truong khac null/rong.
+	b. Filter dang mapping theo record log:
+		Input: type= match_log_record, format_log = /regex format log/, data: [1: "field1", 2 : "field2", ....]
+		Dieu kien: format_log va mapping_fields deu bat buoc
+			Neu toan bo data ko mapping thi ko add data vao ket qua cuoi cung
+		Output: Lay ra cac truong mapping theo format log duoc khai bao tuong ung tai data
+		VD: 	filterConf = {
+				"type" => "match_log_record",
+				"format_log" => "Toi la (\\w*), toi (\\d{2}) tuoi, que((\\s(\\w*))*)",
+				"data" => {
+					1 => "name",
+					2 => "age",
+					3 => "state"
+				}
+			}
+2. Input data dang map (csv file, log4j, eventlog)
+	Xu ly loc data theo dieu kien filter va lay ra cac truong can thiet
+		Input: data_fields = [field1, field3, ....], filter = {field2: /regex 2/}
+		Dieu kien: data_field neu khong truyen thi mac dinh la lay toan bo cac truong, tuy nhien, data_field khac list rong
+			Ngoai ra, do cac truong dua vao dieu kien filter co the khac voi cac truong data duoc lay ra, nen hay xu ly filter trc, sau do neu data thoa man dk filter thi moi lay ra
+		Output: Doi voi cac record thoa man dieu kien filter, lay ra cac truong duoc khai bao tai data_fields
+	VD: CSV file co cac truong: time, error_type(error/warning...), table, error_msg
+		Yeu cau filter lay ra time va error_msg ung voi cac message loi kieu error cua table X
+		Khi do, data_fields = [time, error_msg], filter = {table= "X", error_type = "error"}

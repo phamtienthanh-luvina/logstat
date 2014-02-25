@@ -1,0 +1,39 @@
+Log file
+	log_type = plain_text (plain_text, csv)
+	monitor_type = line (có 2 loại line or date)
+	path <- đường dẫn đến thư mục chứa log, bắt buộc
+	start_file_name = nil <- lấy file cũ nhất trong folder tương ứng
+	start_pos = 0 <- tùy monitor_type mà input là string date hoặc số vị trí
+	asc_by_filename = nil <-  giám sát file hiện tại or nhiều file
+	
+Syslog (Linux)
+	syslog_config_file_path -> default "/etc/syslog.conf", lay dc map config
+	log_type -> default syslog, ngoài ra có thể có shell, usb....
+	from_time -> lấy log từ thời điểm nào, default rỗng, lấy all
+	
+	Tuy loai config ma duong dan den file log se khac nhau, huong xu ly nhu duoi day:
+		Doc config tu syslog_config_file_path
+		tuong ung voi log_type, tim config tuong ung de lay ra dc dia chi Log
+			Neu ko tim dc theo cach chi dinh key, thi check tham so logdir roi check file log tai : [logdir]/[log_type].log
+		Doc log, lay cac data >= from_time
+
+Eventlog (Window)
+	log_type = nil (default Applicate log)
+	from_time_generated = nil (default = '', lấy all)
+
+Log4j và socket: giám sát log realtime
+	host -> default 0.0.0.0
+	port-> bắt buộc
+	time_out -> khoảng thời gian giám sát, sẽ tương đương với khoảng cách giữa các lần chạy job
+
+
+Chu y xu ly persistent data:
+	Data tra ve sau ham xu ly input se bao gom 2 phan:
+		Data Log
+		persistent data (muc dich dung cho lan giam sat sau)
+			Data nay se truyen den ket qua cuoi cung (Ouput)
+	persistent cho cac truong hop nhu sau:
+		Log file : 	start_file_name va start_pos
+		Syslog: 	from_time
+		Eventlog: 	from_time_generated
+		Log4j và socket: Khong can, do lay data realtime

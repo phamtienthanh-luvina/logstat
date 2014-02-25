@@ -1,0 +1,54 @@
+Co 4 dang output:
+	Dua ra file/stdout
+	Dua vao mongoDB
+	Dua ra servlet
+	Day ra duoi dang output cua Job
+	
+	3 truong hop tren co the xu ly output đơn, truong hop cuoi dung rieng cho job
+	
+	Cac tham so input:
+		- type 
+		- config (option)
+	Truong hop default : type = file, config = [path: stdout], dua data ra console
+1. Dua ra file/stdout
+	Input: 	type = file, config = [path: stdout]
+		type = file, config = [path: /filepath/]
+	Output: 
+		path: stdout: day ket qua ra console
+		path: /filepath/: day ket qua ra file tuong ung
+			Truong hop ko tao duoc file thi thong bao loi
+		
+		Ham chay logstat tra ve null
+
+2. Dua vao mongoDB:
+	Input: 	type = mongoDB
+		config = [
+				host: /host/,
+				port: /port/,
+				dbName: /db name/,
+				user: /user/ (option),
+				pass: /pass/ (option)
+			 ]
+		Tham so config host, port, dbName la cac thong so bat buoc
+	
+	Output: data duoc luu vao mongoDB tuong ung voi config ben tren
+		Truong hop xu ly access loi (ko connect dc, insert loi....) thi thong bao loi
+		
+		Ham chay logstat tra ve null
+
+3. Dua ra servlet:
+	Input: 	type = http
+		config = [path: /servlet-path/]
+	Output: data duoc day den servlet tuong ung
+		Truong hop xu ly bi loi thi thong bao loi
+		
+		Ham chay logstat tra ve null
+
+4. Day ra duoi dang output cua Job
+	Input: 	type = job
+	Output: data day ra duoi dang output cua job, xu ly theo config dest cua job
+		Ham chay logstat tra ve data giam sat, trong job return data nay
+		Chu y xu ly persistent data:	Data tra ve co 2 phan:
+			Data giam sat log
+			persistent data
+		Chi tiet xem them o phan input
