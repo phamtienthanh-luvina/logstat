@@ -1,4 +1,3 @@
-
 ##
 # getSyslog: get syslog data (linux)
 # @param syslog_config_file_path
@@ -9,29 +8,23 @@
 def getSyslog(syslog_config_file_path, log_type, from_time)
   # GET INPUT INFORMATION RECEIVE FROM JOB
   # Log Type
-  logType = "syslog"
-  if log_type != nil && log_type != ''
-    logType = log_type
-  end
+  log_type = log_type
+  
   # Time start monitor
   fromTime = 0
   if from_time != nil && from_time != ''
     fromTime = DateTime.parse(from_time).strftime("%s").to_i
   end
-  # Default directory of log file
-  logDir = '/etc/syslog.conf'
-  if syslog_config_file_path != nil && syslog_config_file_path != ''
-    logDir = syslog_config_file_path
-  end
-
+  
+  persist_from_time = from_time
   # PROCESS SYSLOG CONFIGURATION
   mapSyslogConfig = Hash.new
   listSyslog = Array.new
   exitsLogType = false
-  File.foreach(logDir) { |lineDir|
+  File.foreach(syslog_config_file_path) { |lineDir|
     unless lineDir.chomp.empty?
       unless lineDir.include? '#'
-        if lineDir.include? logType
+        if lineDir.include? log_type
           exitsLogType = true
           correspondingFile = lineDir.split(" ")[1]
           # GET DATA INPUT
@@ -39,6 +32,7 @@ def getSyslog(syslog_config_file_path, log_type, from_time)
             regxDate = "(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) [0-9]{2} \\d{2}:\\d{2}:\\d{2}"
             logTime = DateTime.parse(line.match(regxDate).to_s).strftime("%s").to_i
             if (logTime >= fromTime)
+              persist_from_time = line.match(regxDate).to_s
               listSyslog << line
             end
           }
@@ -47,20 +41,26 @@ def getSyslog(syslog_config_file_path, log_type, from_time)
     end
   }
   if exitsLogType == false
-    File.foreach(logDir) { |lineDir|
+    File.foreach(syslog_config_file_path) { |lineDir|
       if lineDir.include? "logdir"
         lstLogDir = lineDir.split(" = ")
-        correspondingFile = "#{lstLogDir[1]}/#{logType}.log"
+        correspondingFile = "#{lstLogDir[1]}/#{log_type}.log"
         # GET DATA INPUT
         File.foreach(correspondingFile) { |line|
           regxDate = /\A((\d{1,2}[-\/]\d{1,2}[-\/]\d{4})|(\d{4}[-\/]\d{1,2}[-\/]\d{1,2}))/
           logTime = DateTime.parse(line.match(regxDate).to_s).strftime("%s").to_i
           if (logTime >= fromTime)
+            persist_from_time = line.match(regxDate).to_s
             listSyslog << line
           end
         }
       end
     }
   end
-  return listSyslog
+  finalData = Hash.new
+  persist_data = Hash.new
+  persist_data["from_time"] = persist_from_time
+  finalData["list_logs"] = listSyslog
+  finalData["persistent_data"] = persist_data
+  return finalData
 end

@@ -42,12 +42,16 @@ public class LogStatImpl implements LogStat{
 
 			bean.setConfig(conf);
 			container.put("bean", bean);
+			container.put("mapDefaultInput", mapDefaultInput);
+			container.put("mapDefaultOutput", mapDefaultOutput);
 			container.runScriptlet("require 'ruby/ProcessInput.rb'");
 			container.runScriptlet("require 'ruby/ProcessFilter.rb'");
 			container.runScriptlet("require 'ruby/ProcessOutput.rb'");
 			//Get input logs from source
 			container.runScriptlet("pi = ProcessInput.new");
-			container.runScriptlet("bean.setInput(pi.getInputData((bean.getConfig)['input']), mapDefaultInput)");
+			container.runScriptlet("puts mapDefaultOutput");
+			container.runScriptlet("bean.setInput(pi.getInputData((bean.getConfig)['input'], mapDefaultInput))");
+			
 			//Filter logs
 			container.runScriptlet("pf = ProcessFilter.new");
 			container.runScriptlet("filter_type = (bean.getConfig)['filter']['filter_type']");

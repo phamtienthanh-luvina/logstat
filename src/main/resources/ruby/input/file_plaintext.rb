@@ -19,7 +19,8 @@ def getLogsByLine(path,start_file_name,start_pos,asc_by_fname)
       end
     end
   end
-
+  persist_start_pos = start_pos
+  persist_start_file_name = start_file_name
   list_logs = Array.new
   #Get data from single file
   if(asc_by_fname == nil)
@@ -31,22 +32,23 @@ def getLogsByLine(path,start_file_name,start_pos,asc_by_fname)
       line_num = $.
       if((line.strip != "") && ( line_num >= start_pos ))
         list_logs << line
+        persist_start_pos = line_num
+        persist_start_file_name = start_file_name
       end
     end
   else
     #Get data from multi file
-    
+
     #get list logs files sort by the modified time
     sorted_by_modified = Dir.entries(path).sort_by {|f| File.mtime(File.join(path,f))}.reject{|entry| entry == "." || entry == ".."}
-      
+
     #File sort to ASC
     if(asc_by_fname == true)
       if(start_file_name == nil )
         start_file_name = sorted_by_modified.first
       end
-      
-      
-      Dir.entries(path).sort.each  do |log_file|       
+
+      Dir.entries(path).sort.each  do |log_file|
         if((log_file <=> start_file_name) >= 0)
           if File.file?(File.join(path,log_file))
             File.foreach(File.join(path,log_file)) do |line|
@@ -60,7 +62,9 @@ def getLogsByLine(path,start_file_name,start_pos,asc_by_fname)
                   list_logs << line
                 end
               end
+              persist_start_pos = line_num
             end
+            persist_start_file_name =  File.basename(log_file)
           end
         end
       end
@@ -84,13 +88,21 @@ def getLogsByLine(path,start_file_name,start_pos,asc_by_fname)
                   list_logs << line
                 end
               end
+              persist_start_pos = line_num
             end
+            persist_start_file_name = File.basename(log_file)
           end
         end
       end
     end
   end
-  return list_logs
+  finalData = Hash.new
+  persist_data = Hash.new
+  persist_data["start_file_name"] = persist_start_file_name
+  persist_data["start_pos"] = persist_start_pos
+  finalData["list_logs"] = list_logs
+  finalData["persistent_data"] = persist_data
+  return finalData
 end
 
 #Get logs from file(s) with multiline seperate by date
@@ -102,6 +114,8 @@ end
 #@return list_logs - a list of logs string
 def getLogsByDate(path,start_file_name,from_date,asc_by_fname)
   require 'date'
+  persist_from_date = Hash.new
+  persist_start_file_name = start_file_name
   list_logs = Array.new
   if(asc_by_fname == nil)
     #Get logs from single file
@@ -109,7 +123,7 @@ def getLogsByDate(path,start_file_name,from_date,asc_by_fname)
       puts "[Logstat]  : 'start_file_name' parameter must be required !"
       return
     end
-    list_logs.push(*getLogsSingleFileByDate(path,start_file_name,from_date,asc_by_fname))
+    list_logs.push(getLogsSingleFileByDate(path,start_file_name,from_date,asc_by_fname,persist_from_date))
   else
     #Get logs from multi files
     sorted_by_modified = Dir.entries(path).sort_by {|f| File.mtime(File.join(path,f))}.reject{|entry| entry == "." || entry == ".."}
@@ -119,10 +133,10 @@ def getLogsByDate(path,start_file_name,from_date,asc_by_fname)
         start_file_name = sorted_by_modified.first
       end
       Dir.entries(path).sort.each  do |log_file|
-
         if File.file?(File.join(path,log_file))
           if((start_file_name <=> log_file) <= 0)
-            list_logs.push(*getLogsSingleFileByDate(path,log_file,from_date,asc_by_fname))
+            list_logs.push(getLogsSingleFileByDate(path,log_file,from_date,asc_by_fname,persist_from_date))
+            persist_start_file_name = log_file
           end
         end
       end
@@ -134,13 +148,21 @@ def getLogsByDate(path,start_file_name,from_date,asc_by_fname)
       Dir.entries(path).sort.reverse.each do |log_file|
         if File.file?(File.join(path,log_file))
           if((start_file_name <=> log_file) >= 0)
-            list_logs.push(*getLogsSingleFileByDate(path,log_file,from_date,asc_by_fname))
+            list_logs.push(getLogsSingleFileByDate(path,log_file,from_date,asc_by_fname,persist_from_date))
+            persist_start_file_name = log_file
           end
         end
       end
     end
   end
-  return list_logs
+  finalData = Hash.new
+  finalData["list_logs"] = list_logs
+  #Persistent data for next monitoring
+  persist_data = Hash.new
+  persist_data["start_file_name"] = persist_start_file_name
+  persist_data["from_date"] = persist_from_date["persist_from_date"]
+  finalData["persistent_data"] = persist_data
+  return finalData
 end
 
 #Get logs from file with multiline seperate by date
@@ -149,7 +171,7 @@ end
 #         or lastest file according to asc_by_fname
 #@param : asc_by_fname - sort files in logs folder
 #@return list_logs - a list of logs in hashes
-def getLogsSingleFileByDate(path,start_file_name,from_date,asc_by_fname)
+def getLogsSingleFileByDate(path,start_file_name,from_date,asc_by_fname,persist_from_date)
   require 'date'
   logs_date = Date.new
   valid_items = false
@@ -166,8 +188,7 @@ def getLogsSingleFileByDate(path,start_file_name,from_date,asc_by_fname)
   check_log_start = false
   log_items = ""
   File.foreach(path+"/"+start_file_name) do |line|
-    line_num = $.
-    if ((line.strip != "") && (line =~ date_regex))
+    if((line.strip != "") && (line =~ date_regex))
       str_date = line[date_regex,1]
       begin
         logs_date = Date.parse(str_date)
@@ -196,6 +217,7 @@ def getLogsSingleFileByDate(path,start_file_name,from_date,asc_by_fname)
         else
           check_log_start = true
         end
+        persist_from_date["persist_from_date"] =  str_date
       rescue Exception => e
         check_log_start = false
         puts "[Logstat]  :  #{e}"

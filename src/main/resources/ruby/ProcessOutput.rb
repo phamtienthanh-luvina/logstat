@@ -1,11 +1,12 @@
 require 'ruby/libs/Common.rb'
 include CommonUtils
 CommonUtils.require_gem('rubygems')
-CommonUtils.require_gem('mongo')
+#CommonUtils.require_gem('bson_ext')
+#CommonUtils.require_gem('mongo')
 CommonUtils.require_gem('net/http')
-CommonUtils.require_gem('active_support')
+#CommonUtils.require_gem('active_support')
 CommonUtils.require_gem('json')
-include Mongo
+#include Mongo
 
 class ProcessOutput
 	##
@@ -24,16 +25,18 @@ class ProcessOutput
 		if outputType == "file" # Out to file/stdout
 			configFile = output_conf['config']
 			if configFile['path'] != nil && configFile['path'] != '' && configFile['path'] != "stdout"
-				self.writeToFile(data, configFile['path'])
+				self.writeToFile(data['list_logs'], configFile['path'])
 			else
-				puts "#{data}"
+        data['list_logs'].each do |eLog|
+          puts "#{eLog}"
+        end
 			end
 		elsif outputType == "mongoDB" # Put on MongoDB
 			# Call method process insert to mongo db
-			self.insertToMongo(data, output_conf['config'], map_default_output)
+			self.insertToMongo(data['list_logs'], output_conf['config'], map_default_output)
 		elsif outputType == "http" # Out to servlet
 			# Call method process send data to servlet
-			self.sendToServlet(data, output_conf['config'], map_default_output)
+			self.sendToServlet(data['list_logs'], output_conf['config'], map_default_output)
 		elsif outputType == "job" # Out to output job format
 			# Call method process put out format of job's output
 			self.putOutJobFormat(data)
@@ -54,8 +57,6 @@ class ProcessOutput
 			end
 		rescue Exception => e
 			puts "Can not create/open file with path config !!!"
-		ensure
-			file.close unless file.nil?
 		end
 	end
 	

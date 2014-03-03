@@ -7,28 +7,16 @@
 #         or lastest file according to asc_by_fname
 #@param : asc_by_fname - sort files in logs folder
 #@return list_logs - a list of logs string
-def getLogsFromFile(path,file_format=nil,monitor_type=nil,start_file_name=nil,start_pos=nil,asc_by_fname=nil,from_date=nil)
+def getLogsFromFile(path,file_format,monitor_type,start_file_name,start_pos,asc_by_fname,from_date)
   require "ruby/input/file_plaintext.rb"
   require "ruby/input/file_csv.rb"
-
-  list_logs = nil
-  #set default monitoring type to 'line'
-  if(monitor_type == nil)
-    monitor_type = "line"
-  end
-  #set default start_pos to 1st line
-  if(start_pos == nil)
-    start_pos = 0
-  end
-  if(file_format == nil)
-    file_format = "plain_text"
-  end
+  
   #get data from plain_text file
   if(file_format == 'plain_text')
     if(monitor_type == 'line')
-      list_logs = getLogsByLine(path,start_file_name,start_pos,asc_by_fname)
+      return getLogsByLine(path,start_file_name,start_pos,asc_by_fname)
     elsif (monitor_type == 'date')
-      list_logs = getLogsByDate(path,start_file_name,from_date,asc_by_fname)
+      return getLogsByDate(path,start_file_name,from_date,asc_by_fname)
     end
   elsif(file_format == 'csv')
     #get data from csv file
@@ -40,10 +28,9 @@ def getLogsFromFile(path,file_format=nil,monitor_type=nil,start_file_name=nil,st
       end
     end
     if(monitor_type == 'line')
-      list_logs = getLogsCSVByLine(path,start_file_name,start_pos,asc_by_fname)
+      return getLogsCSVByLine(path,start_file_name,start_pos,asc_by_fname)
     elsif(monitor_type == 'date')
-      list_logs = getLogsCSVByDate(path,start_file_name,from_date,asc_by_fname)
+      return getLogsCSVByDate(path,start_file_name,from_date,asc_by_fname)
     end
   end
-  return list_logs
 end

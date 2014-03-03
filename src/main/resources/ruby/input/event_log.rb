@@ -5,12 +5,9 @@
 # @return lstEventLog
 ##
 def getEventLog(event_log_type, from_time_generated)
+
+  #Persistent data for next monitoring
   require_gem('jruby-win32ole')
-  # Log type of eventlog
-  logType = 'Application' # default
-  if event_log_type != nil && event_log_type != ''
-    logType = event_log_type
-  end
   # Time generated
   fromTimeGenerated = 0 # default
   if from_time_generated != nil && from_time_generated != ''
@@ -21,22 +18,28 @@ def getEventLog(event_log_type, from_time_generated)
       return
     end
   end
+  persist_from_time = from_time_generated
   wmi = WIN32OLE.connect("winmgmts://")
   wmi_query = ""
   if(OS.bits == 32)
     #Get data from 32 bits OS platform
-    wmi_query  = "select * from Win32_NTLogEvent where Logfile = '#{logType}'"
+    wmi_query  = "select * from Win32_NTLogEvent where Logfile = '#{event_log_type}'"
   else
     #Get data from 64 bits OS platform
-    wmi_query  = "Select * from __InstanceCreationEvent Where TargetInstance ISA 'Win32_NTLogEvent' And (TargetInstance.LogFile = '#{logType}')"
+    wmi_query  = "Select * from __InstanceCreationEvent Where TargetInstance ISA 'Win32_NTLogEvent' And (TargetInstance.LogFile = '#{event_log_type}')"
   end
 
   lstEventLog = Array.new
   begin
     events = wmi.ExecQuery(wmi_query)
-    events.each do |event|      
-      eventTimeGenerate = DateTime.parse(event.TimeGenerated.split(".")[0]).strftime("%s").to_i      
+    tmp_persist = 0
+    events.each do |event|
+      eventTimeGenerate = DateTime.parse(event.TimeGenerated.split(".")[0]).strftime("%s").to_i
       if(eventTimeGenerate >= fromTimeGenerated)
+        if(tmp_persist <= eventTimeGenerate)
+          tmp_persist = eventTimeGenerate
+          persist_from_time = event.TimeGenerated.split(".")[0]
+        end
         tmpEvent = Hash.new
         tmpEvent["source_name"] = event.SourceName
         if(event.EventType == 1)
@@ -56,5 +59,10 @@ def getEventLog(event_log_type, from_time_generated)
       end
     end
   end
-  return lstEventLog
+  finalData = Hash.new
+  persist_data = Hash.new
+  finalData["list_logs"] = lstEventLog
+  persist_data["from_time"] = persist_from_time
+  finalData["persistent_data"] = persist_data
+  return finalData
 end

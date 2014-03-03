@@ -6,14 +6,7 @@
  # @return listLogs
  ##
  def getDataLog4j(port,timeout,host)
-   #set default host
-   if(host == nil)
-     host = '127.0.0.1'
-   end
-   #set default timeout
-   if(timeout == nil)
-     timeout = 30
-   end
+
    require 'socket'
    require "java"
    #require "../lib/java/bundle.wrap/log4j-1.2.14.jar"
