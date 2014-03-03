@@ -26,10 +26,15 @@ Co 4 dang output:
 				host: /host/,
 				port: /port/,
 				dbName: /db name/,
+				tblName: /table name/,
 				user: /user/ (option),
 				pass: /pass/ (option)
 			 ]
-		Tham so config host, port, dbName la cac thong so bat buoc
+		Tham so config host, port, dbName, tblName default như dưới đây
+		    host: localhost
+		    port: 27017
+		    dbName: wiperdog
+		    tbl name: tbl_logstat
 	
 	Output: data duoc luu vao mongoDB tuong ung voi config ben tren
 		Truong hop xu ly access loi (ko connect dc, insert loi....) thi thong bao loi
