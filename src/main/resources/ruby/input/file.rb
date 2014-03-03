@@ -12,15 +12,18 @@ def getLogsFromFile(path,file_format=nil,monitor_type=nil,start_file_name=nil,st
   require "ruby/input/file_csv.rb"
 
   list_logs = nil
+  #set default monitoring type to 'line'
   if(monitor_type == nil)
     monitor_type = "line"
   end
+  #set default start_pos to 1st line
   if(start_pos == nil)
     start_pos = 0
   end
   if(file_format == nil)
     file_format = "plain_text"
   end
+  #get data from plain_text file
   if(file_format == 'plain_text')
     if(monitor_type == 'line')
       list_logs = getLogsByLine(path,start_file_name,start_pos,asc_by_fname)
@@ -28,6 +31,7 @@ def getLogsFromFile(path,file_format=nil,monitor_type=nil,start_file_name=nil,st
       list_logs = getLogsByDate(path,start_file_name,from_date,asc_by_fname)
     end
   elsif(file_format == 'csv')
+    #get data from csv file
     if(start_file_name != nil)
       file_ext = File.extname(File.join(path,start_file_name))
       if(file_ext != ".csv")

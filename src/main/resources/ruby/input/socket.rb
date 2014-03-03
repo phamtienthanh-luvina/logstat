@@ -7,8 +7,14 @@
 # @return listLogs
 ##
 def getDataFromSocket(port,timeout,host)
+  require 'socket'
+  #default host is localhost
   if(host==nil)
-    host = "127.0.0.1"
+    host = "localhost"
+  end
+  #default timeout is 60s
+  if(timeout == nil)
+    timeout = 60
   end
   begin
     server = TCPServer.open(host,port)  # Socket to listen on @port

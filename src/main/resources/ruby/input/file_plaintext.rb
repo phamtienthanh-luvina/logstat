@@ -21,27 +21,36 @@ def getLogsByLine(path,start_file_name,start_pos,asc_by_fname)
   end
 
   list_logs = Array.new
+  #Get data from single file
   if(asc_by_fname == nil)
     if(start_file_name == nil)
       puts "[Logstat]  : 'start_file_name' parameter must be required !"
       return
     end
-    File.foreach(path+"/"+start_file_name).with_index do |line, line_num|
-
-      if((line.strip != "") && (line_num >= start_pos ))
+    File.foreach(path+"/"+start_file_name) do |line|
+      line_num = $.
+      if((line.strip != "") && ( line_num >= start_pos ))
         list_logs << line
       end
     end
   else
+    #Get data from multi file
+    
+    #get list logs files sort by the modified time
     sorted_by_modified = Dir.entries(path).sort_by {|f| File.mtime(File.join(path,f))}.reject{|entry| entry == "." || entry == ".."}
+      
+    #File sort to ASC
     if(asc_by_fname == true)
       if(start_file_name == nil )
         start_file_name = sorted_by_modified.first
       end
-      Dir.entries(path).sort.each  do |log_file|
+      
+      
+      Dir.entries(path).sort.each  do |log_file|       
         if((log_file <=> start_file_name) >= 0)
           if File.file?(File.join(path,log_file))
-            File.foreach(File.join(path,log_file)).with_index do |line, line_num|
+            File.foreach(File.join(path,log_file)) do |line|
+              line_num = $.
               if((log_file <=> start_file_name) == 0 )
                 if((line.strip != "") && line_num >= start_pos)
                   list_logs << line
@@ -56,13 +65,16 @@ def getLogsByLine(path,start_file_name,start_pos,asc_by_fname)
         end
       end
     else
+      #File sort to DESC
       if(start_file_name == nil )
         start_file_name = sorted_by_modified.last
       end
       Dir.entries(path).sort.reverse.each do |log_file|
+        line_num = $.
         if File.file?(File.join(path,log_file))
           if((log_file <=> start_file_name) <= 0)
-            File.foreach(File.join(path,log_file)).with_index do |line, line_num|
+            File.foreach(File.join(path,log_file)) do |line|
+              line_num = $.
               if(( start_file_name <=> log_file) == 0)
                 if((line.strip != "") && line_num <= start_pos)
                   list_logs << line
@@ -153,7 +165,8 @@ def getLogsSingleFileByDate(path,start_file_name,from_date,asc_by_fname)
   list_logs = Array.new
   check_log_start = false
   log_items = ""
-  File.foreach(path+"/"+start_file_name).with_index do |line, line_num|
+  File.foreach(path+"/"+start_file_name) do |line|
+    line_num = $.
     if ((line.strip != "") && (line =~ date_regex))
       str_date = line[date_regex,1]
       begin

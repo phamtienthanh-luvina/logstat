@@ -22,7 +22,7 @@ class ProcessInput
       elsif (input_conf['input_type'] == 'log4j')
         
         #get logs from log4j via socket
-        if(input_conf['port'] != nil)
+        if(input_conf['port'] != nil )
           require "ruby/input/log4j.rb"
           return getDataLog4j(input_conf['port'],input_conf['timeout'],input_conf['host'])
         else

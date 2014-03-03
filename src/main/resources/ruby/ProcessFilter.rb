@@ -12,7 +12,7 @@ class ProcessFilter
 	 # @param list_logs: list data from process input
 	 # @return resultData: list log data after process filter 
 	##
-	def filter(filter_type, filter_conf, list_logs)
+	def filter(filter_type, filter_conf, list_logs)    
 		resultData = Array.new
 		if list_logs[0].class.to_s == "String"
 			resultData = filterListString(filter_type, filter_conf, list_logs)

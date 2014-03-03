@@ -1,4 +1,3 @@
-
 ##
 # getEventLog: get eventlog viewer (windows)
 # @param event_log_type: Application(default), ODiag, OSession, Security, System, ...
@@ -16,7 +15,7 @@ def getEventLog(event_log_type, from_time_generated)
   fromTimeGenerated = 0 # default
   if from_time_generated != nil && from_time_generated != ''
     begin
-    fromTimeGenerated = DateTime.parse(from_time_generated).strftime("%s").to_i
+      fromTimeGenerated = DateTime.parse(from_time_generated).strftime("%s").to_i
     rescue Exception => ex
       puts "[Logstat] : Incorrect date : '#{from_time_generated}'  "
       return
@@ -35,18 +34,27 @@ def getEventLog(event_log_type, from_time_generated)
   lstEventLog = Array.new
   begin
     events = wmi.ExecQuery(wmi_query)
-    events.each do |event|
-      eventTimeGenerate = DateTime.parse(event.TimeGenerated).strftime("%s").to_i
+    events.each do |event|      
+      eventTimeGenerate = DateTime.parse(event.TimeGenerated.split(".")[0]).strftime("%s").to_i      
       if(eventTimeGenerate >= fromTimeGenerated)
         tmpEvent = Hash.new
+        tmpEvent["source_name"] = event.SourceName
+        if(event.EventType == 1)
+          tmpEvent["type"] = "ERROR"
+        elsif(event.EventType == 2)
+          tmpEvent["type"] = "WARNING"
+        elsif(event.EventType == 3)
+          tmpEvent["type"] = "INFORMATION"
+        elsif(event.EventType == 4)
+          tmpEvent["type"] = "SERCURITY AUDIT SUCCESS"
+        elsif(event.EventType == 5)
+          tmpEvent["type"] = "SERCURITY AUDIT FAILURE"
+        end
         tmpEvent["time"] = event.TimeGenerated
         tmpEvent["message"] = event.Message
         lstEventLog <<  tmpEvent
       end
     end
   end
-  puts lstEventLog
   return lstEventLog
 end
-
-puts getEventLog(nil,nil)
