@@ -12,14 +12,20 @@ class ProcessFilter
 	 # @param list_logs: list data from process input
 	 # @return resultData: list log data after process filter 
 	##
-	def filter(filter_type, filter_conf, list_logs)    
+	def filter(filter_type, filter_conf, mapDataFromInput)
 		resultData = Array.new
-		if list_logs[0].class.to_s == "String"
-			resultData = filterListString(filter_type, filter_conf, list_logs)
-		elsif list_logs[0].class.to_s == "Hash"
-			resultData = filterListMap(filter_conf, list_logs)
+		finalData = Hash.new
+		list_logs = mapDataFromInput['list_logs']
+		if list_logs != nil && list_logs != []
+			if list_logs[0].class.to_s == "String"
+				resultData = filterListString(filter_type, filter_conf, list_logs)
+			elsif list_logs[0].class.to_s == "Hash"
+				resultData = filterListMap(filter_conf, list_logs)
+			end
 		end
-		return resultData
+		finalData['list_logs'] = resultData
+		finalData['persistent_data'] = mapDataFromInput['persistent_data']
+		return finalData
 	end
 
 	##

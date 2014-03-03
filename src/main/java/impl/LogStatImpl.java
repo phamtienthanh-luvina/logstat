@@ -1,6 +1,6 @@
 package impl;
-import java.util.HashMap;
 
+import java.util.HashMap;
 import org.jruby.embed.LocalContextScope;
 import org.jruby.embed.LocalVariableBehavior;
 import org.jruby.embed.ScriptingContainer;
@@ -8,6 +8,7 @@ import org.jruby.embed.osgi.OSGiScriptingContainer;
 import org.osgi.framework.Bundle;
 
 import service.LogStat;
+import lib.Common;
 /**
  * Implement of LogStat service
  * @author nguyenxuanluong
@@ -21,13 +22,21 @@ public class LogStatImpl implements LogStat{
 
 	/**
 	 * Monitoring logs
-	 * @param args : An array of paramters 
+	 * @param args : An array of paramters
 	 */
-	@Override
 	public void runLogStat(HashMap<String,Object> conf) {
 		try {
+			// Get default values
+			HashMap<String, Object> mapDefaultInput = new HashMap<String, Object>();
+			HashMap<String, Object> mapDefaultOutput = new HashMap<String, Object>();
+			Common common = new Common();
+			HashMap<String, Object> mapDefault = common.getInputConfig();
+			mapDefaultInput = (HashMap<String, Object>) mapDefault.get("input");
+			mapDefaultOutput = (HashMap<String, Object>) mapDefault.get("output");
+			
+			// Ruby process
 			LogStatBean bean = new LogStatBean();
-			ScriptingContainer container = new OSGiScriptingContainer(this.bundle,LocalContextScope.SINGLETON ,LocalVariableBehavior.PERSISTENT);
+			ScriptingContainer container = new OSGiScriptingContainer(this.bundle,LocalContextScope.SINGLETHREAD,LocalVariableBehavior.PERSISTENT);
 			container.setHomeDirectory("classpath:/META-INF/jruby.home");
 			System.out.println("LogStartService Running ...");
 
@@ -38,22 +47,20 @@ public class LogStatImpl implements LogStat{
 			container.runScriptlet("require 'ruby/ProcessOutput.rb'");
 			//Get input logs from source
 			container.runScriptlet("pi = ProcessInput.new");
-			container.runScriptlet("bean.setInput(pi.getInputData((bean.getConfig)['input']))");
+			container.runScriptlet("bean.setInput(pi.getInputData((bean.getConfig)['input']), mapDefaultInput)");
 			//Filter logs
 			container.runScriptlet("pf = ProcessFilter.new");
 			container.runScriptlet("filter_type = (bean.getConfig)['filter']['filter_type']");
 			container.runScriptlet("filter_conf = (bean.getConfig)['filter']['filter_conf']");
-			container.runScriptlet("bean.setOutput(pf.filter(filter_type, filter_conf, bean.getInput)");
+			container.runScriptlet("bean.setOutput(pf.filter(filter_type, filter_conf, bean.getInput))");
 			//Output logs
 			container.runScriptlet("po = ProcessOutput.new");
-			container.runScriptlet("po.output(bean.getOutput,(bean.getConfig)['output'])");
+			container.runScriptlet("po.output(bean.getOutput,(bean.getConfig)['output'], mapDefaultOutput)");
 			
 			System.out.println("LogStartService Completed ...");
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
-
-		
 	}
 	//Bean to store logstat information (input-output data & configuration)
 	public class LogStatBean {
@@ -81,5 +88,4 @@ public class LogStatImpl implements LogStat{
 		public HashMap<String,Object> config;
 		
 	}
-
 }
