@@ -121,8 +121,6 @@ def getLogsCSVByDate(path,start_file_name=nil,from_date=nil,asc_by_fname=nil)
       puts "[Logstat] : Incorrect 'from_date' parameter: #{from_date}"
       return
     end
-  else
-    from_date = Date.parse(Time.now.to_s)
   end
 
   persist_from_date = from_date
@@ -158,15 +156,19 @@ def getLogsCSVByDate(path,start_file_name=nil,from_date=nil,asc_by_fname=nil)
       end
       Dir.glob(path+"/*.csv").sort.each  do |log_file|
         #Retrieve data from csv file and only get logs line if the logs time is equal or later than from_date
-        if((File.join(path,start_file_name) <=> log_file ) >=0)
+        if((File.join(path,start_file_name) <=> log_file ) <=0)
           CSV.foreach(log_file, :headers => true) do |csv_obj|
             if(!csv_obj.empty?)
               logs_time = Date.parse(csv_obj[0])
-              if( logs_time >= from_date)
+              if(!from_date.nil?)
+                if( logs_time >= from_date)
+                  list_logs << csv_obj.to_hash
+                end
+              else
                 list_logs << csv_obj.to_hash
-                persist_from_date = csv_obj[0]
-                persist_start_file_name = File.basename(log_file)
               end
+              persist_from_date = csv_obj[0]
+              persist_start_file_name = File.basename(log_file)
             end
           end
         end
@@ -178,11 +180,17 @@ def getLogsCSVByDate(path,start_file_name=nil,from_date=nil,asc_by_fname=nil)
       end
       Dir.glob(path+"/*.csv").sort.reverse.each do |log_file|
         #Retrieve data from csv file and only get logs line if the logs time is equal or earlier than from_date
-        if((File.join(path,start_file_name) <=> log_file ) <= 0)
+        if((File.join(path,start_file_name) <=> log_file ) >= 0)
           CSV.foreach(log_file, :headers => true) do |csv_obj|
-            logs_time = Date.parse(csv_obj[0])
-            if(!csv_obj.empty? && logs_time <= from_date)
-              list_logs << csv_obj.to_hash
+            if(!csv_obj.empty?)
+              logs_time = Date.parse(csv_obj[0])
+              if(!from_date.nil?)
+                if(logs_time <= from_date)
+                  list_logs << csv_obj.to_hash
+                end
+              else
+                list_logs << csv_obj.to_hash
+              end
               persist_from_date = csv_obj[0]
               persist_start_file_name = File.basename(log_file)
             end
