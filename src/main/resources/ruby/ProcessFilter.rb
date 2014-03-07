@@ -15,16 +15,21 @@ class ProcessFilter
   def filter(filter_type, filter_conf, mapDataFromInput)
     resultData = Array.new
     finalData = Hash.new
-    list_logs = mapDataFromInput['list_logs']
-    if list_logs != nil && list_logs != []
-      if list_logs[0].class.to_s == "String"
-        resultData = filterListString(filter_type, filter_conf, list_logs)
-      elsif list_logs[0].class.to_s == "Hash"
-        resultData = filterListMap(filter_conf, list_logs)
+    if(!mapDataFromInput.nil?)
+      list_logs = mapDataFromInput['list_logs']
+      if list_logs != nil && list_logs != []
+        if list_logs[0].class.to_s == "String"
+          resultData = filterListString(filter_type, filter_conf, list_logs)
+        elsif list_logs[0].class.to_s == "Hash"
+          resultData = filterListMap(filter_conf, list_logs)
+        end
       end
+      finalData['list_logs'] = resultData
+      finalData['persistent_data'] = mapDataFromInput['persistent_data']
+    else
+      puts "[Logstat]: No data for filter !"
+      return
     end
-    finalData['list_logs'] = resultData
-    finalData['persistent_data'] = mapDataFromInput['persistent_data']
     return finalData
   end
 
@@ -103,7 +108,7 @@ class ProcessFilter
     listFilterAppropriate = Array.new
     listLogs.each { |log|
       checkLogAppropriate = true
-      filter.each { |field, regxCorresponding|        
+      filter.each { |field, regxCorresponding|
         dataFieldFilter = log[field].to_s.match(/#{regxCorresponding}/).to_s
         if dataFieldFilter.strip == '' || dataFieldFilter.nil?
           checkLogAppropriate = false

@@ -40,7 +40,7 @@ class ProcessOutput
           self.sendToServlet(data['list_logs'], output_conf['config'], map_default_output)
         elsif outputType == "job" # Out to output job format
           # Call method process put out format of job's output
-          self.putOutJobFormat(data)
+	  dataFromOutput = self.putOutJobFormat(data)
         end
       else
         puts "[Logstat]: No data to output !"
@@ -48,6 +48,7 @@ class ProcessOutput
     else
       puts "[Logstat]: No data to output !"
     end
+    return dataFromOutput
   end
 
   ##
@@ -125,8 +126,9 @@ class ProcessOutput
   # @param servletConf: configuration from job
   ##
   def sendToServlet(data, servletConf, mapDefaultOutput)
+    CommonUtils.require_gem('uri')
     CommonUtils.require_gem('net/http')
-    CommonUtils.require_gem('active_support')
+    #CommonUtils.require_gem('active_support')
     CommonUtils.require_gem('json')
 
     pathConf = mapDefaultOutput['pathConf']
@@ -141,7 +143,7 @@ class ProcessOutput
     @port = uri.port
     @path = uri.path
 
-    @body = ActiveSupport::JSON.encode(data)
+    @body = JSON(data)
 
     request = Net::HTTP::Post.new(@path, initheader = {'Content-Type' =>'application/json'})
     request.body = @body
@@ -155,6 +157,9 @@ class ProcessOutput
   # @return data
   ##
   def putOutJobFormat(data)
+    CommonUtils.require_gem('rubygems')
+    CommonUtils.require_gem('json')
+    data = JSON(data)
     return data
   end
 end

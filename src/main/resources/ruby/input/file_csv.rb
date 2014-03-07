@@ -76,10 +76,12 @@ def getLogsCSVByLine(path,start_file_name=nil,start_pos=nil,asc_by_fname=nil)
         start_file_name = sorted_by_modified.last
       end
       Dir.glob(path + "/*.csv").sort.reverse.each do |log_file|
+        
         #if log_file is equal or newer than start_file_name then get data from this file
         if((File.join(path,start_file_name) <=> log_file ) >=0)
-          line_num = $.
+          
           CSV.foreach(log_file, :headers => true) do |csv_obj|
+            line_num = $.
             if(!csv_obj.empty?)
               if((File.join(path,start_file_name) <=> log_file) == 0)
                 if( line_num <= start_pos)
@@ -96,6 +98,7 @@ def getLogsCSVByLine(path,start_file_name=nil,start_pos=nil,asc_by_fname=nil)
       end
     end
   end
+  
   finalData = Hash.new
   persist_data = Hash.new
   persist_data["start_file_name"] = persist_start_file_name

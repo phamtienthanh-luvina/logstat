@@ -1,4 +1,5 @@
 require 'ruby/libs/Common.rb'
+
 include CommonUtils
 
 class ProcessInput
@@ -8,6 +9,7 @@ class ProcessInput
   # @return listLogs;
   ##
   def getInputData(input_conf, map_default_input)
+
     if(input_conf != nil)
       CommonUtils.require_gem("os")
       # PROCESS FILE
@@ -51,7 +53,7 @@ class ProcessInput
           puts "[Logstat]: Path to logs directory is required !"
           return
         end
-      # PROCESS LOG4J
+        # PROCESS LOG4J
       elsif (input_conf['input_type'] == 'log4j')
         #get logs from log4j via socket
         port = input_conf['port']
@@ -72,7 +74,7 @@ class ProcessInput
           puts "[Logstat]:Port is required !"
           return
         end
-      # PROCESS SOCKET
+        # PROCESS SOCKET
       elsif (input_conf['input_type'] == 'socket')
         #get logs from socket
         port = input_conf['port']
@@ -81,7 +83,7 @@ class ProcessInput
           # Time out
           timeout = input_conf['socket.timeout']
           if (timeout == nil || timeout == '')
-            timeout = map_default_input['timeout']
+            timeout = map_default_input['socket.timeout']
           end
           # Host IP
           host = input_conf['host']
@@ -93,7 +95,7 @@ class ProcessInput
           puts "[Logstat]:Port is required !"
           return
         end
-      # PROCESS EVENTLOG
+        # PROCESS EVENTLOG
       elsif (OS.windows? && input_conf['input_type'] == 'eventlog')
         require "ruby/input/event_log.rb"
         # Event log type
@@ -108,7 +110,7 @@ class ProcessInput
         end
         # Call getEventlog method
         return getEventLog(event_log_type, from_time_generated)
-      # PROCESS SYSLOG
+        # PROCESS SYSLOG
       elsif (OS.linux? && input_conf['input_type'] == 'sys_log')
         # Call getSyslog method
         require "ruby/input/sys_log.rb"

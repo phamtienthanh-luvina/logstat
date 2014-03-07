@@ -6,16 +6,27 @@
 # @return listSyslog
 ##
 def getSyslog(syslog_config_file_path, log_type, from_time)
-  # GET INPUT INFORMATION RECEIVE FROM JOB
-  # Log Type
-  log_type = log_type
-  
   # Time start monitor
   fromTime = 0
   if from_time != nil && from_time != ''
-    fromTime = DateTime.parse(from_time).strftime("%s").to_i
+    begin
+      fromTime = DateTime.parse(from_time).strftime("%s").to_i
+    rescue Exception => e
+      puts "[Logstat]: Invalid date : #{from_time}"
+      return
+    end
   end
-  
+  if(log_type.nil?)
+    puts "[Logstat]: Log type is required !"
+    return
+  end
+  if(syslog_config_file_path.nil?)
+    puts "[Logstat]: Path to syslog is required !"
+    return
+  elsif(!File.exist?(syslog_config_file_path))
+    puts "[Logstat]: Path to syslog is not avaiable !"
+    return
+  end
   persist_from_time = from_time
   # PROCESS SYSLOG CONFIGURATION
   mapSyslogConfig = Hash.new

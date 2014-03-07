@@ -24,7 +24,8 @@ public class LogStatImpl implements LogStat{
 	 * Monitoring logs
 	 * @param args : An array of paramters
 	 */
-	public void runLogStat(HashMap<String,Object> conf) {
+	public String runLogStat(HashMap<String,Object> conf) {
+		String finalData = "";
 		try {
 			// Get default values
 			HashMap<String, Object> mapDefaultInput = new HashMap<String, Object>();
@@ -36,7 +37,7 @@ public class LogStatImpl implements LogStat{
 			
 			// Ruby process
 			LogStatBean bean = new LogStatBean();
-			ScriptingContainer container = new OSGiScriptingContainer(this.bundle,LocalContextScope.SINGLETHREAD,LocalVariableBehavior.PERSISTENT);
+			ScriptingContainer container = new OSGiScriptingContainer(this.bundle,LocalContextScope.CONCURRENT,LocalVariableBehavior.PERSISTENT);
 			container.setHomeDirectory("classpath:/META-INF/jruby.home");
 			System.out.println("LogStartService Running ...");
 
@@ -59,12 +60,15 @@ public class LogStatImpl implements LogStat{
 			container.runScriptlet("bean.setOutput(pf.filter(filter_type, filter_conf, bean.getInput))");
 			//Output logs
 			container.runScriptlet("po = ProcessOutput.new");
-			container.runScriptlet("po.output(bean.getOutput,(bean.getConfig)['output'], mapDefaultOutput)");
-			
+			container.runScriptlet("dataFromOutput = po.output(bean.getOutput,(bean.getConfig)['output'], mapDefaultOutput)");
+			if (container.get("dataFromOutput") != null ) {
+				finalData = (String) container.get("dataFromOutput");
+			}
 			System.out.println("LogStartService Completed ...");
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
+		return finalData;
 	}
 	//Bean to store logstat information (input-output data & configuration)
 	public class LogStatBean {
