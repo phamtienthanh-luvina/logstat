@@ -44,8 +44,8 @@ def getLogsByLine(path,start_file_name,start_pos,asc_by_fname)
 
     #File sort to ASC
     if(asc_by_fname == true)
-      if(start_file_name == nil )        
-        start_file_name = sorted_by_modified.first        
+      if(start_file_name == nil )
+        start_file_name = sorted_by_modified.first
       end
       Dir.entries(path).sort.each  do |log_file|
         if((log_file <=> start_file_name) >= 0)
@@ -131,9 +131,8 @@ def getLogsByDate(path,start_file_name,from_date,asc_by_fname)
       if(start_file_name == nil )
         start_file_name = sorted_by_modified.first
       end
-
       Dir.entries(path).sort.each  do |log_file|
-        
+
         if File.file?(File.join(path,log_file))
           if((start_file_name <=> log_file) <= 0)
             list_logs.concat(getLogsSingleFileByDate(path,log_file,from_date,asc_by_fname,persist_from_date))
@@ -175,7 +174,7 @@ end
 def getLogsSingleFileByDate(path,start_file_name,from_date,asc_by_fname,persist_from_date)
   require 'date'
   logs_date = Date.new
-  valid_items = false
+  valid_items = nil
   if(from_date != nil)
     begin
       from_date = Date.parse(from_date)
@@ -188,13 +187,18 @@ def getLogsSingleFileByDate(path,start_file_name,from_date,asc_by_fname,persist_
   list_logs = Array.new
   check_log_start = false
   log_items = ""
+
   File.foreach(path+"/"+start_file_name) do |line|
+    #check first line start with a date string
     if((line.strip != "") && (line =~ date_regex))
       str_date = line[date_regex,1]
+      #check if date is validate
       begin
         logs_date = Date.parse(str_date)
+        #if monitor type is date
         if(from_date != nil)
-          if(asc_by_fname == nil || asc_by_fname)
+          #if monitor only 1 file or multi file with sort by ASC file name
+          if(asc_by_fname == nil || asc_by_fname)                       
             if(from_date <= logs_date)
               check_log_start = true
               valid_items = true
@@ -205,6 +209,7 @@ def getLogsSingleFileByDate(path,start_file_name,from_date,asc_by_fname,persist_
               valid_items = false
             end
           else
+            #if monitor multi file with sort by DESC file name
             if(from_date >= logs_date)
               check_log_start = true
               valid_items = true
@@ -227,18 +232,34 @@ def getLogsSingleFileByDate(path,start_file_name,from_date,asc_by_fname,persist_
       check_log_start = false
     end
     #Add log_items to list_logs
-    if(check_log_start )
-      if(log_items.strip != "")
-        list_logs << log_items
+    if(valid_items.nil?)
+      if(check_log_start )
+        if(log_items.strip != "")
+          list_logs << log_items
+        end
+        #New logs items
+        log_items = line
+      else
+        if(log_items.strip != "")
+          log_items += line
+        end
       end
-      #New logs items
-      log_items = line
     else
-      if(log_items.strip != "")
-        log_items += line
+      #if a new logs start,and previous items is valid then add it to list log
+      if(check_log_start && valid_items)
+        if(log_items.strip != "")
+          list_logs << log_items
+        end
+        #New logs items
+        log_items = line
+      else
+        if(log_items.strip != "")
+          log_items += line
+        end
       end
     end
   end
+
   #Last items
   if(valid_items == true )
     list_logs << log_items
